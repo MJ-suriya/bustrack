@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Bus Movement</title>
+  <!-- Bootstrap CSS CDN -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    /* Set map container size */
+    #map {
+      height: 600px;
+      width: 100%;
+      position: relative; /* Ensure position relative for absolute positioning */
+    }
+
+    /* Styling for the graphical display */
+    .graphical-display {
+      position: absolute;
+      bottom: 10px;
+      left: 10px; /* Adjust left positioning */
+      background: linear-gradient(to right, #0074D9, #FFFFFF); /* Gradient colors */
+      color: white;
+      padding: 10px;
+      text-align: center;
+      z-index: 1;
+    }
+
+    /* Icon styles */
+    .icon {
+      width: 30px;
+      height: 30px;
+      vertical-align: middle;
+      margin-right: 5px;
+    }
+
+    .green-icon {
+      background-color: green;
+      border-radius: 50%;
+    }
+
+    .red-icon {
+      background-color: red;
+      border-radius: 50%;
+    }
+
+    @media (max-width: 768px) {
+      .graphical-display div {
+        display: inline-block;
+        margin-right: 20px;
+      }
+    }
+  
+    .back-btn {
+    position: absolute;
+    float: right;
+    top: 10px;
+    right: 10px;
+}
+
+.custom-label {
+    text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black; 
+    margin-left:60px;
+}
+
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <button class="btn btn-secondary back-btn" onclick="window.history.back()">Back</button>
+ 
+  <!-- Graphical display -->
+  <div class="graphical-display">
+    <div>
+      <img id="add-date-icon" class="icon" src="https://cdn-icons-png.flaticon.com/512/1828/1828304.png" alt="Date icon">
+      <p id="add-date">Date: </p>
+    </div>
+
+    <div>
+      <img id="speed-icon" class="icon" src="https://cdn-icons-png.flaticon.com/512/3536/3536507.png" alt="Speed icon">
+      <p id="speed">Speed: </p>
+      <p id="ignition">Ignition: </p>
+    </div>
+
+    <div>
+      <img id="ignition-icon" class="icon" src="https://cdn-icons-png.flaticon.com/512/189/189667.png" alt="Ignition icon">
+    </div>
+  </div>
+
+  <script>
+    var map;
+    var markers = [];
+
+    function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 15 // You may adjust the zoom level as needed
+        });
+
+        fetchAndUpdateData(); // Fetch data initially
+        setInterval(fetchAndUpdateData, 5000); // Fetch data every 5 seconds
+
+        // You may also set a one-time zoom to fit all markers
+        // fitBoundsToMarkers();
+    }
+
+    function addMarker(point) {
+        var marker = new google.maps.Marker({
+            position: { lat: parseFloat(point.lati), lng: parseFloat(point.longi) },
+            map: map,
+           // icon: 'http://104.237.9.130/gps/truck.png',
+           icon: {
+            //url: 'https://www.svgrepo.com/show/127575/location-sign.svg', 
+            url: 'https://png.pngtree.com/png-clipart/20230123/original/pngtree-flat-red-location-sign-png-image_8927579.png',
+            scaledSize: new google.maps.Size(30, 30) // Adjust the size of the icon as needed
+        },
+        label: {
+    text: 'bus 6', // Text to display
+    color: 'white', // Text color
+    fontSize: '14px', // Font size
+    fontWeight: 'bold',
+    labelOrigin: new google.maps.Point(30, 15), // Position the label to the right of the icon
+    className: 'custom-label' // Custom class for additional styling
+},
+        });
+        markers.push(marker);
+    }
+
+    function fetchAndUpdateData() {
+        fetch('http://104.237.9.130/bus_data/?device_id=867440066279894 ')
+            .then(response => response.json())
+            .then(data => {
+                clearMarkers();
+                if (data && data.length > 0) {
+                    data.forEach(point => {
+                        addMarker(point);
+                    });
+                    updateDisplay(data[0]);
+                    // Focus map on the latest marker
+                    map.setCenter({ lat: parseFloat(data[0].lati), lng: parseFloat(data[0].longi) });
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            });
+    }
+
+    function clearMarkers() {
+        markers.forEach(marker => {
+            marker.setMap(null);
+        });
+        markers = [];
+    }
+
+    function updateDisplay(point) {
+        document.getElementById('add-date').textContent = 'Date: ' + point.add_date;
+        document.getElementById('speed').textContent = 'Speed: ' + point.speed;
+        document.getElementById('ignition').textContent = 'Ignition: ' + point.ignition;
+
+        var ignitionIcon = document.getElementById('ignition-icon');
+        if (point.ignition === '1') {
+            ignitionIcon.classList.add('green-icon');
+            ignitionIcon.classList.remove('red-icon');
+        } else {
+            ignitionIcon.classList.add('red-icon');
+            ignitionIcon.classList.remove('green-icon');
+        }
+    }
+</script>
+  <!-- Load the Google Maps JavaScript API -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+ 
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBYXZRUGuY4yCIQwCKbhj_kiSastYrq0k4&callback=initMap" async defer></script>
+</body>
+</html>
