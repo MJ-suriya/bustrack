@@ -3,8 +3,7 @@ let notRunningCount2 = 0;
 let RunningCount1 = 0; // Initialize count for fetchAndUpdateData()
 let RunningCount2 = 0; 
     function fetchAndUpdateData() {
-      //  fetch('http://104.237.9.130/bus_data/?device_id=867440066085796')
-        fetch('https://cors-anywhere.herokuapp.com/http://104.237.9.130/bus_data/?device_id=867440066085796')
+         fetch('http://104.237.9.130/bus_data/?device_id=867440066085796')
             .then(response => response.json())
             .then(data => {
                 console.log('Fetched data:', data); // Log fetched data for debugging
