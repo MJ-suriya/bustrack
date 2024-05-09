@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Display Images from Google Drive</title>
+  <style>
+    .image-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .image-container img {
+      margin: 10px;
+      max-width: 200px;
+      max-height: 200px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Images from Google Drive</h1>
+
+  <div class="image-container" id="image-container">
+    <!-- Images will be displayed here -->
+  </div>
+
+  <script>
+    // URL of the Google Apps Script web app
+    const webAppUrl = 'https://script.google.com/macros/s/AKfycbxnS1mZ5Ur3dvCOm_DeziPcFNp7JxwDfXiCvwNt74NEqBe8-m3Y4upFYWJYtwvF16Qc/exec';
+
+    // Fetch data from the web app endpoint
+    async function fetchData() {
+      const response = await fetch(webAppUrl);
+      const data = await response.json();
+      return data;
+    }
+
+    // Display images on the webpage
+    async function displayImages() {
+      const data = await fetchData();
+      const container = document.getElementById('image-container');
+
+      data.forEach(item => {
+        const imageUrl = `https://drive.google.com/uc?export=view&id=${getImageId(item.book_url)}`;
+        const img = document.createElement('img');
+        img.src = imageUrl;
+        container.appendChild(img);
+      });
+    }
+
+    // Extract image ID from the book URL
+    function getImageId(bookUrl) {
+      const urlSplit = bookUrl.split('/d/');
+      const imageIdSplit = urlSplit[1].split('/view');
+      return imageIdSplit[0];
+    }
+
+    displayImages();
+  </script>
+</body>
+</html>
